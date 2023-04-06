@@ -50,10 +50,6 @@ const gridTemplateSmallScreens = `
 "h"
 "i"
 "i"
-"i"
-"i"
-"j"
-"j"
 "j"
 "j"
 `;
