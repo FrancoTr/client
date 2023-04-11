@@ -1,6 +1,7 @@
+import { useMemo } from "react";
 import DashboardBox from "@/components/DashboardBox";
 import { useGetKpisQuery } from "@/state/api";
-import React from "react";
+import { useTheme } from "@mui/material";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -14,8 +15,21 @@ import {
 type Props = {};
 
 const Row1 = (props: Props) => {
+  const { palette } = useTheme();
   const { data } = useGetKpisQuery();
   console.log("data", data);
+  const revenueExpenses = useMemo(() => {
+    return (
+      data &&
+      data[0].monthlyData.map(({ month, revenue, expenses }) => {
+        return {
+          name: month.substring(0, 3),
+          revenue: revenue,
+          expenses: expenses,
+        };
+      })
+    );
+  }, [data]);
   return (
     <>
       <DashboardBox gridArea='a'>
@@ -23,7 +37,7 @@ const Row1 = (props: Props) => {
           <AreaChart
             width={500}
             height={400}
-            data={data}
+            data={revenueExpenses}
             margin={{
               top: 10,
               right: 30,
@@ -31,11 +45,30 @@ const Row1 = (props: Props) => {
               bottom: 0,
             }}
           >
-            <CartesianGrid strokeDasharray='3 3' />
-            <XAxis dataKey='name' />
-            <YAxis />
+            <XAxis dataKey='name' tickLine={false} style={{ fontSize: "10px" }} />
+            <YAxis
+              tickLine={false}
+              axisLine={{ strokeWidth: "0" }}
+              style={{ fontSize: "10px" }}
+              domain={[8000, 23000]}
+            />
             <Tooltip />
-            <Area type='monotone' dataKey='uv' stroke='#8884d8' fill='#8884d8' />
+            <Area
+              type='monotone'
+              dataKey='revenue'
+              dot={true}
+              stroke={palette.primary.main}
+              fillOpacity={1}
+              fill='url(#colorRevenue)'
+            />
+            <Area
+              type='monotone'
+              dataKey='expenses'
+              dot={true}
+              stroke={palette.primary.main}
+              fillOpacity={1}
+              fill='url(#colorExpenses)'
+            />
           </AreaChart>
         </ResponsiveContainer>
       </DashboardBox>
