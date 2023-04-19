@@ -75,6 +75,9 @@ const Predictions = (props: Props) => {
             dot={{ strokeWidth: 5 }}
           />
           <Line type='monotone' dataKey='Regression Line' stroke='#8884d8' dot={false} />
+          {isPredictions && (
+            <Line type='monotone' dataKey='Predicted Revenue' stroke={palette.secondary[500]} />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </DashboardBox>
