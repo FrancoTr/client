@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useTheme, Box, Typography, Button } from "@mui/material";
 import { useGetKpisQuery } from "@/state/api";
 import DashboardBox from "@/components/DashboardBox";
@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import regression, { DataPoint } from "regression";
 
 type Props = {};
 
@@ -21,6 +22,25 @@ const Predictions = (props: Props) => {
   const { palette } = useTheme();
   const [isPredictions, setIsPredictions] = useState(false);
   const { data: kpiData } = useGetKpisQuery();
+
+  const formattedData = useMemo(() => {
+    if (!kpiData) return [];
+    const monthData = kpiData[0].monthlyData;
+
+    const formatted: Array<DataPoint> = monthData.map(({ month, revenue, expenses }, i: number) => {
+      return [i, revenue];
+    });
+    const regressionLine = regression.linear(formatted);
+
+    return monthData.map(({ month, revenue }, i: number) => {
+      return {
+        name: month,
+        "Actual Revenue": revenue,
+        "Regression Line": regressionLine.points[i][1],
+        "Predicted Revenue": regressionLine.predict(i + 12)[1],
+      };
+    });
+  }, [kpiData]);
 
   return (
     <DashboardBox width='100%' height='100%' p='1rem' overflow='hidden'>
@@ -76,7 +96,11 @@ const Predictions = (props: Props) => {
           />
           <Line type='monotone' dataKey='Regression Line' stroke='#8884d8' dot={false} />
           {isPredictions && (
-            <Line type='monotone' dataKey='Predicted Revenue' stroke={palette.secondary[500]} />
+            <Line
+              strokeDasharray='5 5'
+              dataKey='Predicted Revenue'
+              stroke={palette.secondary[500]}
+            />
           )}
         </LineChart>
       </ResponsiveContainer>
